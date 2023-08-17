@@ -1,0 +1,9 @@
+A: B, C
+B: D, f
+C: X, Z
+
+A(S) -> X(X)
+
+q:
+p: 1C 2D 2X 2Z
+ps: p[0A 1B 2F] 

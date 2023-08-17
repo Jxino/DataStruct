@@ -1,0 +1,224 @@
+2023.07.18 avl tree를 java와 javascript로 구현하였음
+           java와 c++ 버전에 가변 list 적용 필요
+2023.07.19 java, c++에서의 avl tree에서 array를 List로 수정, ADT 개념 학습
+2023.07.20 c언어로 hashtable 구현
+2023.07.21 iterator를 구현한 코드를 c와 c++, java에서 보완 및 수정함
+2023.07.22 iterator를 arraylist와 linkedlist에서 구현(python, javascript), hashtable을 c++에서 구현
+2023.07.23 avl tree와 hashtable에서 쓰이는 함수들을 정리하고 비슷한 기능을 하는 함수들을 몇 개 추가함. 
+           tree와 hashtable을 통해 Map을 이해
+2023.07.24 c++, java, c, javascript에서 keys(), values(), contains(), get_count() 함수를 만들었음.
+           get_count()와 관련하여 del()의 count값 감소 오류 해
+2023.07.25 Set을 python에서 구현함
+2023.07.26 Set 관련 함수들을 java, c, c++에서 구현하고 오류 수정함
+2023.07.27 python과 javascript에서 quick sort 구현
+2023.07.28 java와 c++, c의 avltree에서 quick sort 구현, 비교 연산자 (함수 포인터)
+2023.07.29 avltree와 hashtable에서 sort와 Set 구현, arraylist.js에 sort 구현
+2023.07.30 linkedlist.py,js arraylist.py, js에서 sort를 구현함. qsort()에서 swap 오류 수정
+           , iterator에서 cur_node 오류 수정
+2023.08.02 arraylist.java:c++, linkedlist.java:c++에서 sort 구현, iterator 오류 수정
+2023.08.03 arraylist.c, linkedlist.c에서 sort 구현
+2023.08.04 C언어에서 범용으로 쓸 수 있는 제네릭 어레이리스트 구현, list.c
+2023.08.05 list.c에서 str을 array에 넣을 수 있도록 코드 수정, list에 type desc를 줄 수 있도록 수정
+           C언어로 정적 라이브러리 생성하는 법을 배움
+           Makefile과 make를 배움
+2023.08.06 map.c에서 Generic HashMap을 구현하는 중...
+2023.08.07 list.c를 세부적으로 계산, map.c 구현, make.py 구현 중...
+2023.08.08 map.h, map_test.c, make.py 만듦. list.c랑 map.c 디버깅 중...
+2023.08.09 map.c, list.c에서 List의 buckets의 type casting 변경 및 오류 수정
+           graph.py 개발 시작
+2023.08.13 graph.java 구현
+2023.08.14 graph.cpp 구현
+2023.08.16 graph.c 구현
+To do: graph.js graph.c
+       Github 사용법
+       map_retirieve 디버깅 필요
+       list_retrieve 디버깅 필요
+-------------------------------------
+Generic List in C: C언어 가변 array, C++ std::vector<T>, java ArrayList<T>
+typedef struct List {
+    int sizeof_T;
+    void* array;
+    int size;
+    int capacity;
+} List;
+List* list = List_create(sizeof(Type));
+void List_insert(int index, void* element);
+void* List_delete(int index);
+void List_destroy();
+int List_find(void* element);
+-------------------------------------
+Graph/network(점과 선으로 연결된 대상을 표현하는 자료구조)
+, Directed Graph(방향성 그래프)
+, Bidirectional Graph(양방향성 그래프)
+, Weighted Graph(가중치가 부여된 그래프)
+, Directed Acyclic Graph(방향성을 갖추고 있으면서 사이클이 없는 그래프) // DAG = Tree
+, Acyclic Graph(사이클이 없는 그래프)
+vertex(vertices), edge(edges)
+node, link
+adjacency list(인접 리스트)
+a: b(0.3), c(0.7), x(0.9  )
+b: d, c, y
+c: f, z, w, d
+d: d, z
+...
+pseudo code(유사 코드)
+graph:
+    adjacency_list
+adjacency_item:
+    node
+    neighbors
+graph.add_node(nodename):
+    if (not adjacency_list.has(nodename)):
+        item = adjacency_item(nodename)
+        adjacency_list.add_item(item)
+graph.add_link(anode, bnode):
+    target_item = adjacency_list.search_item(anode)
+    if (target_item != null):
+        target_item.add_link(bnode)
+graph.search_paths(anode, bnode):
+    path = []
+    paths = []
+    stack = [] // q = []
+    stack.push(<0, anode>) // 0A q.enqueue(<0, anode>)
+    while (not stack.empty()):
+        <level, node> = stack.pop() // q.dequeue()
+        path.remove_failed_visits (level) // path에서 level 이상을 지운다
+        path.push(<level, node>) // 0A 1C 2F 2D 1B
+        neighbors = adjacency_list.search_neighbors(node)
+        for neighbor in neighbors: // 1B, 1C 2D, 2F 2X, 2Z
+            if (neighbor == bnode): // 2X = bnode
+                path.push(<level + 1, neighbor>) // 0A 1C 2F 2D 1B 2X
+                paths.add(path)
+                path = []
+            stack.push(<level + 1, neighbor>) // q.enqueue(<level + 1, neighbor>)
+    return paths  
+
+-------------------------------------
+Map이라는 이상적인 Data Structure(ADT)
+map = new Map()
+iter = map.iterator()
+map.put(key, value)
+value = map.get(key)
+map.del(key)
+map.print()
+keys = map.keys()
+values = map.values()
+yesno = map.contains(key)
+count = map.get_count()
+-------------------------------------
+table = new HashTable() // HashMap() O(1)
+iter = table.iterator()
+table.put(key, value)
+value = table.get(key)
+table.del(key)
+table.print()
+keys = table.keys()
+values = table.values()
+yesno = table.contains(key)
+count = table.get_count()
+-------------------------------------
+tree = new AVLTree() // TreeMap() O(logn)
+count = tree.get_count()
+keys = tree.keys()
+values = tree.values()
+value = tree.search(key)
+yesno = tree.contains(key)
+tree.insert(key, value)
+tree.remove_item(key)
+tree.print()
+iter = tree.iterator()
+------------------------------------
+dict = {}
+dict[key] = value
+value = dict[key]
+del dict[key]
+count = len(dict)
+keys = dict.keys()
+values = dict.values()
+bool = key in dict
+-------------------------------------
+list = List(); // 이상적인 리스트, Abstract Data Type(ADT), 필요한 함수들을 정의하고 있는 가상의 자료구조(DataType)
+void list.append(data); // void list.push(data); 
+data = list.pop(); // data = list[list.size() - 1]; list.remove(list.size() - 1);
+delete list;
+data = list[i]; // data = list.get(i)
+size = list.size();
+index = list.find(data); 
+bool = list.contains(data); // 3인칭 단수형 index = list.find(data); return (index >= 0) ? true : false;
+void list.insert(index, data); // list.put(index, data), list.set(index, data)
+void list.remove(index);
+-------------------------------------
+
+List()
+void prepend_item(Data* data) == inser_at(int 0, Data* data) refactoring(리팩토링) 코드 재정리
+void print()
+int count()
+void append_item(Data* data) == inser_at(int count, Data* data)
+Data* get_item(int index)
+void remove_item(Data* data) // int find(Data* data); remove_at(int index)
+Data* remove_at(int index) 
+~List()
+int find(Data* data)
+bool insert_at(int index, Data* data)
+-------------------------------------
+new java.util.ArrayList<Node>(); // java generic list
+void list.add(Node item);
+Node list.get(int index);
+void list.remove(int index);
+int list.size();
+-------------------------------------
+std::vector<Data>* list = new std::vector<Data>(); // c++ generic list
+void list->push_back(Data data);
+void list->pop_back();
+Data data = (*list)[i];
+void list->erase(list->begin() + index);
+void list->insert(list->begin() + index, data);
+size_t list->size();
+-------------------------------------
+list = [] #python
+list.append(data)
+data = list[index]
+list[index] = data
+data = list.pop()
+list.insert(index, data)
+del list[index]
+length = len(list)
+-------------------------------------
+list = []; // javascript
+length = list.length;
+list.splice(index, 1); // list.erase(index)
+list.push(node);
+list.splice(index, 0, data); // list.insert(index, data)
+-------------------------------------
+
+
+
+    class inorder_iterator:
+        def __init__(self, node):
+            self.stack = []
+            self.current = node
+
+        def __next__(self):
+            while self.current or self.stack:
+                if self.current:
+                    self.stack.append(self.current)
+                    self.current = self.current.left
+                else:
+                    node = self.stack.pop()
+                    value = node.value
+                    self.current = node.right
+                    return value
+            raise StopIteration
+
+class X {
+    int a;
+    public int i;
+    public static int j;
+    public void f() {this.a; this.i; X.j -= 1;};
+    public static void g() {X.j; X x = new X(); x.i; X.j += 1;};
+}
+X.j += 3; X::g();
+X x = new X(); x.f();
+X y = new X();
+
+object , 객체, 인스턴스instance
