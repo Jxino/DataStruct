@@ -8,8 +8,8 @@
 #include "list.h"
 #include "map.h"
 
-// #define debug printf("%s,%d: ", __FILE__, __LINE__); printf
-#define debug if (false) printf
+#define debug printf("%s,%d: ", __FILE__, __LINE__); printf
+// #define debug if (false) printf
 
 Bucket* Bucket_create(size_t K_size, const char* K_desc, size_t V_size, const char* V_desc) {
     Bucket* This = (Bucket*) malloc(sizeof(Bucket));
@@ -37,7 +37,9 @@ bool Bucket_delete(Bucket* This, void* p_key) {
 }
 
 void Bucket_destroy(Bucket* This) {
+    // debug("keys = %p\n", This->keys);
     List_destroy(This->keys);
+    // debug("values = %p\n", This->values);
     List_destroy(This->values);
     free(This);
 }
@@ -71,8 +73,10 @@ Map* Map_create(size_t K_size, const char* K_desc, size_t V_size, const char* V_
 }
 
 void Map_destroy(Map* This) {
+    // debug("Map_destroy n_buckets = %ld\n", This->n_buckets);
     for (size_t i = 0; i < This->n_buckets; i++) {
         Bucket* bucket = This->buckets[i];
+        // debug("Map_destroy bucket i = %ld, bucket = %p\n", i, bucket);
         Bucket_destroy(bucket);
     }
     free(This->buckets);
@@ -98,7 +102,7 @@ size_t hash(void* p_key, size_t K_size, const char* K_desc) {
             hash += (size_t) (*((void**) p_key)) + 40;   
         }
     }
-    debug("hash() returns %d\n", hash);
+    // debug("hash() returns %ld\n", hash);
     return hash;
 }
 
@@ -131,8 +135,8 @@ void Map_resize(Map* This) {
 }
 
 bool Map_put(Map* This, void* p_key, void* p_value) {
-    debug("Map_put()\n");
-    debug("p_key = %p, This = %p, This->K_size=%d, This->K_desc=%s\n", p_key, This, This->K_size, This->K_desc);
+    // debug("Map_put()\n");
+    // debug("p_key = %p, This = %p, This->K_size=%ld, This->K_desc=%s\n", p_key, This, This->K_size, This->K_desc);
     size_t h = hash(p_key, This->K_size, This->K_desc);
     // debug("h=%d\n", h);
     size_t bucket_idx = h % This->n_buckets;
@@ -140,11 +144,11 @@ bool Map_put(Map* This, void* p_key, void* p_value) {
     bool inserted = Bucket_insert(bucket, p_key, p_value);
     if (inserted) {   
         This->count += 1;
-        debug("Map_resize()\n");
+        // debug("Map_resize()\n");
         Map_resize(This);
-        debug("Map_resize() done\n");
+        // debug("Map_resize() done\n");
     }
-    debug("Map_put()return inserted=%d\n", inserted);
+    // debug("Map_put()return inserted=%d, n_buckets=%ld\n", inserted, This->n_buckets);
     return inserted;
 }
 
@@ -169,54 +173,63 @@ bool Map_retrieve(Map* This, void* p_key, void* p_value) {
 }
 
 bool Map_contains(Map* This, void* p_key) {
-    debug("Map_contains()\n");
+    // debug("Map_contains()\n");
     size_t h = hash(p_key, This->K_size, This->K_desc);
     size_t bucket_idx = h % This->n_buckets;    
     Bucket* bucket = This->buckets[bucket_idx];
     int idx = List_find(bucket->keys, p_key);
     if (idx >= 0) {
-        debug("Map_contains() return true\n");
+        // debug("Map_contains() return true\n");
         return true;
     }
-    debug("Map_contains() return false\n");
+    // debug("Map_contains() return false\n");
     return false;
 }
+
 
 Iterator* Iterator_next(Iterator* iter) {
     assert(iter != NULL);
     Map* map = iter->map;
     assert(map != NULL);
-    while (iter->cur_bucket < map->n_buckets) {
-        Bucket* bucket = map->buckets[iter->cur_bucket];
+    while (iter->bucket_i < map->n_buckets) {
+        Bucket* bucket = map->buckets[iter->bucket_i];
         assert(bucket != NULL);
-        // debug("bucket=%d, count=%d\n", iter->cur_bucket, List_count(bucket->keys));
-        if (iter->cur_key < List_count(bucket->keys)) {
-            iter->p_key = List_get(bucket->keys, iter->cur_key);
-            iter->p_value = List_get(bucket->values, iter->cur_key);
-            iter->cur_key += 1;
+        // debug("bucket=%d, count=%d\n", iter->bucket_i, List_count(bucket->keys));
+        if (iter->bucket_i_j < List_count(bucket->keys)) {
+            iter->p_key = List_get(bucket->keys, iter->bucket_i_j);
+            iter->p_value = List_get(bucket->values, iter->bucket_i_j);
+            iter->bucket_i_j += 1;
             return iter;
         } else {
-            iter->cur_key = 0;
+            iter->bucket_i_j = 0;
         }
-        iter->cur_bucket += 1;
+        iter->bucket_i += 1;
     }
     return NULL;
+}
+
+void Iterator_key(Iterator* iter, void* p_key) {
+    memcpy(p_key, iter->p_key, iter->map->K_size);
+}
+
+void Iterator_value(Iterator* iter, void* p_value) {
+    memcpy(p_value, iter->p_value, iter->map->V_size);
 }
 
 Iterator* Map_iterator(Map* This) {
     Iterator* iter = (Iterator*) malloc(sizeof(Iterator));
     iter->map = This;
-    iter->cur_bucket = 0;
-    iter->cur_key = 0;
+    iter->bucket_i = 0;
+    iter->bucket_i_j = 0;
     This->iter = iter;
     return iter;
 }
 
 void Map_print(Map* This) {
     Iterator* iter = Map_iterator(This);
-    printf("Map K_size: %d, K_desc: \"%s\"\n", This->K_size, This->K_desc);
-    printf("Map V_size: %d, V_desc: \"%s\"\n", This->V_size, This->V_desc);
-    printf("Map count: %d, n_buckets: %d\n", This->count, This->n_buckets);
+    printf("Map K_size: %ld, K_desc: \"%s\"\n", This->K_size, This->K_desc);
+    printf("Map V_size: %ld, V_desc: \"%s\"\n", This->V_size, This->V_desc);
+    printf("Map count: %ld, n_buckets: %ld\n", This->count, This->n_buckets);
     while (Iterator_next(iter) != NULL) {
         if (STREQ(This->K_desc, "i")) {
             printf("    key=%d,", *((int*) iter->p_key));

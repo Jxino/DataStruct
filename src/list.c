@@ -67,12 +67,14 @@ void List_delete(List* This, size_t index) {
 }
 
 void List_destroy(List* This) {
+    // debug("List_destroy This = %p\n", This);
     if (STREQ(This->T_desc, "s")) {
         for (size_t i = 0; i < This->count; i++) {
             char** idx_ptr = (char**) List_get(This, i);
             free(*idx_ptr);
         }
     }
+    // debug("This->array = %p\n", This->array);
     free(This->array);
     free(This->T_desc);
     free(This);
@@ -95,12 +97,12 @@ int List_find(List* This, const void* p_elem) {
 }
 
 void List_print(List* This, void (*print_elem)(const void* elem)) {
-    printf("count=%d, capacity=%d, T_desc=\"%s\", T_size=%d: ", This->count, This->capacity, This->T_desc, This->T_size);
+    printf("count=%ld, capacity=%ld, T_desc=\"%s\", T_size=%ld: ", This->count, This->capacity, This->T_desc, This->T_size);
     for (size_t i = 0; i < This->count; i++) {
         char* idx_ptr = (char*) List_get(This, i);
         if (print_elem == NULL) {
             if (STREQ(This->T_desc, "i")) {
-                printf("%d ", *((size_t*) idx_ptr));
+                printf("%ld ", *((size_t*) idx_ptr));
             } else if (STREQ(This->T_desc, "c")) {
                 printf("%c ", *((char*) idx_ptr));
             } else if (STREQ(This->T_desc, "s")) {
